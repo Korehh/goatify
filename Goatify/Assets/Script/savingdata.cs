@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using EasyUI.Popup ;
+using System.Linq;
 
 public class savingdata : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class savingdata : MonoBehaviour
     public Dropdown breedDropdown;
     public Dropdown genderDropdown;
     public Dropdown obtainDropdown;
+
+    public InputField otherinputField;
 
     public Text nameText;
     public Text ageText;
@@ -32,7 +35,9 @@ public class savingdata : MonoBehaviour
     private string dataFilePathArchive;
     private List<GoatData> dataList;
 
+    
     private MyDataGoat myData;
+    //private DatePicker datePicker;
 
     private void Awake()
     {
@@ -47,6 +52,8 @@ public class savingdata : MonoBehaviour
         LoadData();
         int targetAge = PlayerPrefs.GetInt("AgePass");
         DisplayDataByAge(targetAge);
+         obtainDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        // datePicker.SelectedDate = DateTime.Today;
     }
 
     private void SaveData()
@@ -78,7 +85,18 @@ public class savingdata : MonoBehaviour
         string notes = notesInputField.text;
         string breed = breedDropdown.options[breedDropdown.value].text;
         string gender = genderDropdown.options[genderDropdown.value].text;
-        string obtain = obtainDropdown.options[obtainDropdown.value].text;
+        //string obtain = obtainDropdown.options[obtainDropdown.value].text;
+        string obtain;
+        if (obtainDropdown.options[obtainDropdown.value].text == "Other")
+            {
+                 obtain = otherinputField.text;
+            }
+            else
+            {
+                
+                 obtain = obtainDropdown.options[obtainDropdown.value].text;
+            }
+
 
         GoatData newData = new GoatData(name, age, birth, entry, weight, notes, breed, gender, obtain);
         dataList.Add(newData);
@@ -157,7 +175,16 @@ public class savingdata : MonoBehaviour
             targetData.notes = notesInputField.text;
             targetData.breed = breedDropdown.options[breedDropdown.value].text;
             targetData.gender = genderDropdown.options[genderDropdown.value].text;
-            targetData.obtain = obtainDropdown.options[obtainDropdown.value].text;
+            //targetData.obtain = obtainDropdown.options[obtainDropdown.value].text;
+            if (obtainDropdown.options[obtainDropdown.value].text == "Other")
+            {
+                targetData.obtain = otherinputField.text;
+            }
+            else
+            {
+                
+                targetData.obtain = obtainDropdown.options[obtainDropdown.value].text;
+            }
 
             // Save the updated data
             SaveData();
@@ -187,7 +214,22 @@ public class savingdata : MonoBehaviour
 
             SetDropdownValue(breedDropdown, targetItem.breed);
             SetDropdownValue(genderDropdown, targetItem.gender);
-            SetDropdownValue(obtainDropdown, targetItem.obtain);
+           
+            if (targetItem.obtain == "Born of farm" || targetItem.obtain == "Purchased")
+            {
+                // Show the input field
+                 otherinputField.gameObject.SetActive(false);
+                SetDropdownValue(obtainDropdown, targetItem.obtain);
+
+            }
+            else
+            {
+                // Hide the input field
+                
+                SetDropdownValue(obtainDropdown, "Other");
+                otherinputField.gameObject.SetActive(true);
+                otherinputField.text = targetItem.obtain;
+            }
         }
         else
         {
@@ -230,12 +272,20 @@ public class savingdata : MonoBehaviour
             Debug.Log("No data item found with the specified age: " + targetAge);
         }
     }
-     public void Button4 () {
-      Popup.Show ("Success", "Your Goat  save successfully.", "OK", PopupColor.Green, () => AddData()) ;
-   }
-   public void Button5 () {
-      Popup.Show ("Success", "Edit successfully.", "OK", PopupColor.Green, () => UpdateDataByAgeFromInputField()) ;
-   }
+     private void OnDropdownValueChanged(int value)
+        {
+            // Check if the selected option is "Other"
+            if (obtainDropdown.options[value].text == "Other")
+            {
+                // Show the input field
+                otherinputField.gameObject.SetActive(true);
+            }
+            else
+            {
+                // Hide the input field
+                otherinputField.gameObject.SetActive(false);
+            }
+        }
 
 }
 

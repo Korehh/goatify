@@ -108,6 +108,8 @@ public class ArchiveDisplayingdata : MonoBehaviour
             RectTransform textTransform = dataTextObject.GetComponent<RectTransform>();
             textTransform.anchoredPosition = new Vector2(0f, yOffset);
 
+              // Set the text color to white
+            dataText.color = Color.white;
             // Create a button as a child of the Text object
             GameObject buttonObject = new GameObject("Button");
             buttonObject.transform.SetParent(dataTextObject.transform, false);
