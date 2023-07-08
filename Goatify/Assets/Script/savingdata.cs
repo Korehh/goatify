@@ -11,6 +11,7 @@ public class savingdata : MonoBehaviour
 {
     public InputField nameInputField;
     public InputField ageInputField;
+    public InputField agedisplayInputField;
     public InputField datebirthInputField;
     public InputField dateentryageInputField;
     public InputField weightInputField;
@@ -54,6 +55,8 @@ public class savingdata : MonoBehaviour
         DisplayDataByAge(targetAge);
          obtainDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
         // datePicker.SelectedDate = DateTime.Today;
+        int randomNum = Random.Range(1000, 10000);
+        ageInputField.text = randomNum.ToString();
     }
 
     private void SaveData()
@@ -206,7 +209,7 @@ public class savingdata : MonoBehaviour
         {
             // Assign the data fields to text objects
             nameInputField.text = targetItem.name;
-            ageInputField.text = targetItem.age.ToString();
+            agedisplayInputField.text = targetItem.age.ToString();
             datebirthInputField.text = targetItem.birth;
             dateentryageInputField.text = targetItem.entry;
             weightInputField.text = targetItem.weight;
@@ -235,7 +238,7 @@ public class savingdata : MonoBehaviour
         {
             // If no data item with the target age is found, display a message
             nameInputField.text = "No Data";
-            ageInputField.text = "";
+            agedisplayInputField.text = "";
             datebirthInputField.text = "";
             dateentryageInputField.text = "";
             weightInputField.text = "";
@@ -286,7 +289,14 @@ public class savingdata : MonoBehaviour
                 otherinputField.gameObject.SetActive(false);
             }
         }
-
+    public void birthChoose(){
+        Debug.Log("birthChoose method called");
+        datebirthInputField.text = DatePickerControl.dateStringFormato;
+    }
+    public void EntryChoose(){
+        Debug.Log("EntryChoose method called");
+        dateentryageInputField.text = DatePickerControl.dateStringFormato;
+    }
 }
 
 
