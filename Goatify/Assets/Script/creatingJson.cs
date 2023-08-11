@@ -5,28 +5,40 @@ using UnityEngine.UI;
 using System.IO;
 public class creatingJson : MonoBehaviour
 {
-    // Start is called before the first frame update
   void Start()
     {
 
-        string filename = Path.Combine(Application.persistentDataPath, "GoatInfo.json");
-        string filenamear = Path.Combine(Application.persistentDataPath, "Archivedata.json");
+            string filename = Path.Combine(Application.persistentDataPath, "GoatInfo.json");
+            string filenamear = Path.Combine(Application.persistentDataPath, "Archivedata.json");
+            string filenameWeight = Path.Combine(Application.persistentDataPath, "weightdata.json");
 
-        if (!File.Exists(filename))
+            if (!File.Exists(filename) || !File.Exists(filenamear) || !File.Exists(filenameWeight))
         {
-            // Create an empty JSON file
-            File.WriteAllText(filename, "{}");
-            File.WriteAllText(filenamear, "{}");
+            // Create empty JSON files for each file that doesn't exist
+            if (!File.Exists(filename))
+            {
+                File.WriteAllText(filename, "{}");
+                Debug.Log("Created " + filename);
+            }
 
-            Debug.Log("Created goatinfo.json");
+            if (!File.Exists(filenamear))
+            {
+                File.WriteAllText(filenamear, "{}");
+                Debug.Log("Created " + filenamear);
+            }
+
+            if (!File.Exists(filenameWeight))
+            {
+                File.WriteAllText(filenameWeight, "{}");
+                Debug.Log("Created " + filenameWeight);
+            }
         }
         else
         {
-            Debug.Log("goatinfo.json already exists");
+            Debug.Log("All files already exist");
         }
         
     }
-    // Update is called once per frame
     void Update()
     {
         

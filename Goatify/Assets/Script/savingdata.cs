@@ -47,8 +47,7 @@ public class savingdata : MonoBehaviour
     }
 
     private void Start()
-    {
-
+    {   
         dataList = new List<GoatData>();
         LoadData();
         int targetAge = PlayerPrefs.GetInt("AgePass");
@@ -290,8 +289,8 @@ public class savingdata : MonoBehaviour
             }
         }
     public void birthChoose(){
-        Debug.Log("birthChoose method called");
-        datebirthInputField.text = DatePickerControl.dateStringFormato;
+        //Debug.Log("birthChoose method called");
+        //datebirthInputField.text = DatePickerControl.dateStringFormato;
     }
     public void EntryChoose(){
         Debug.Log("EntryChoose method called");

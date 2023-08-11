@@ -16,8 +16,11 @@ EditorBuildSettings:
     guid: 3c9772a807491ca4abbb8d2aca3ce857
   - enabled: 1
     path: Assets/Scenes/WEIGHT.unity
-    guid: a537338f48ebae94199fb1e86092717c
+    guid: b506da2f099c30c4496b6ec28f259ece
   - enabled: 1
+    path: Assets/Scenes/GoatTest.unity
+    guid: 7f2a76b465f5fde4bb82e194b73d7a26
+  - enabled: 0
     path: Assets/Scenes/GOAT.unity
     guid: 4182bb454d719f9438f1a452260d3a9b
   - enabled: 1

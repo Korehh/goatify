@@ -7,31 +7,31 @@ using UnityEngine.SceneManagement;
 public class weightdata : MonoBehaviour
 {
     public Dropdown nameDropdown;
-    public Text ageText;
-    public Text birthText;
-    public Text entryText;
-    public Text weightText;
+    public Text dateText;
     public Text notesText;
-    public Text breedText;
-    public Text genderText;
-    public Text obtainText;
+    public Text weightText;
+
+    public InputField dateInput;
+    public InputField weightInput;
+    public InputField notesInput;
 
     public GameObject dataTB;
     public Transform dataContainer;
     private Dictionary<string, GameObject> dataObjects = new Dictionary<string, GameObject>();
     private MyWeight myWeight;
 
+    private string jsonFilePath;
 
     void Start()
     {
-        string jsonFilePath = Path.Combine(Application.persistentDataPath, "Archivedata.json");
+        jsonFilePath = Path.Combine(Application.persistentDataPath, "Weightdata.json");
 
         // Read the JSON file
         string jsonString = File.ReadAllText(jsonFilePath);
 
         // Parse the JSON data
         myWeight = JsonUtility.FromJson<MyWeight>(jsonString);
-        nameDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        nameDropdown.onValueChanged.AddListener(OnNameDropdownValueChanged);
         if (myWeight != null && myWeight.dataList != null)
         {
             // Populate the dropdown with names
@@ -70,20 +70,15 @@ public class weightdata : MonoBehaviour
         nameDropdown.AddOptions(names);
     }
 
-    public void OnNameDropdownValueChanged()
+    public void OnNameDropdownValueChanged(int index)
     {
         // Get the selected name from the dropdown
-        string selectedName = nameDropdown.options[nameDropdown.value].text;
+        string selectedName = nameDropdown.options[index].text;
 
         // Display the data based on the selected name
         DisplayDataByName(selectedName);
-    }
-    private void OnDropdownValueChanged(int index)
-    {
-        // Retrieve the selected option from the dropdown
-        string selectedOption = nameDropdown.options[index].text;
 
-        // Call your desired method with the selected option
+        // Update the data objects
         CreateDataObjects();
     }
 
@@ -94,21 +89,14 @@ public class weightdata : MonoBehaviour
             // Find the data item with the target name
             WeightData targetItem = myWeight.dataList.Find(item => item.name == targetName);
 
-            if (targetItem != null)
+            if (targetItem != null && targetItem.details != null && targetItem.details.Count > 0)
             {
-                // Assign the data fields to text objects
-                ageText.text = targetItem.age.ToString();
-                birthText.text = targetItem.birth;
-                entryText.text = targetItem.entry;
-                weightText.text = targetItem.weight;
-                notesText.text = targetItem.notes;
-                breedText.text = targetItem.breed;
-                genderText.text = targetItem.gender;
-                obtainText.text = targetItem.obtain;
+                // Display the first detail entry
+                DisplayDetailData(targetItem.details[0]);
             }
             else
             {
-                // If no data item with the target name is found, display a message
+                // If no detail data is available, display a message
                 ClearTextFields();
             }
         }
@@ -119,58 +107,122 @@ public class weightdata : MonoBehaviour
         }
     }
 
-    private void ClearTextFields()
+    private void DisplayDetailData(DetailData detailData)
     {
-        ageText.text = "";
-        birthText.text = "";
-        entryText.text = "";
-        weightText.text = "";
-        notesText.text = "";
-        breedText.text = "";
-        genderText.text = "";
-        obtainText.text = "";
+        // Assign the data fields to text objects
+        dateText.text = detailData.date;
+        notesText.text = detailData.notes;
+        weightText.text = detailData.weight.ToString();
     }
 
-    private void CreateDataObjects()
+    private void ClearTextFields()
+    {
+        dateText.text = "";
+        notesText.text = "";
+        weightText.text = "";
+    }
+
+    public void SaveData()
+    {
+        // Retrieve the entered data from the UI fields
+        string name = nameDropdown.options[nameDropdown.value].text;
+        string date = dateInput.text;
+        string notes = notesInput.text;
+        float weight = float.Parse(weightInput.text);
+
+        // Create a new DetailData object
+        DetailData newData = new DetailData()
+        {
+            date = date,
+            notes = notes,
+            weight = weight
+        };
+
+        // Find the existing data item with the same name
+        WeightData existingData = myWeight.dataList.Find(item => item.name == name);
+
+        if (existingData != null)
+        {
+            // Add the new detail data to the existing data item
+            existingData.details.Add(newData);
+        }
+        else
+        {
+            // Create a new WeightData object
+            WeightData newWeightData = new WeightData()
+            {
+                name = name,
+                details = new List<DetailData> { newData }
+            };
+
+            // Add the new WeightData to the dataList
+            myWeight.dataList.Add(newWeightData);
+        }
+
+        // Convert the dataList to JSON format
+        string jsonData = JsonUtility.ToJson(myWeight);
+
+        // Write the JSON data to the file
+        File.WriteAllText(jsonFilePath, jsonData);
+
+        // Update the dropdown options
+        PopulateNameDropdown();
+
+        // Update the data objects
+        CreateDataObjects();
+    }
+
+ private void CreateDataObjects()
     {
         // Clear any existing data objects
         ClearDataObjects();
 
-        // Iterate through the data entries in the JSON
-        for (int i = 0; i < myWeight.dataList.Count; i++)
-        {
-            WeightData data = myWeight.dataList[i];
-            string name = data.name;
+        // Get the selected name from the dropdown
+        string selectedName = nameDropdown.options[nameDropdown.value].text;
 
-            // Check if a data object already exists for the name
-            if (!dataObjects.ContainsKey(name))
+        // Find the data item with the selected name
+        WeightData selectedData = myWeight.dataList.Find(item => item.name == selectedName);
+
+        if (selectedData != null)
+        {
+            for (int i = 0; i < selectedData.details.Count; i++)
             {
                 // Instantiate a new data object from the template
-                GameObject newDataObject = Instantiate(dataTB, dataContainer);
+                GameObject newDataObject;
+
+                if (i == 0)
+                {
+                    newDataObject = Instantiate(dataTB, dataContainer);
+                }
+                else
+                {
+                    newDataObject = Instantiate(dataTB, dataContainer.transform);
+                    newDataObject.name = dataTB.name + " clone " + i;
+                }
 
                 // Assign the corresponding data to the Text components of the new data object
-                AssignDataToTextComponents(newDataObject, data);
+                AssignDataToTextComponents(newDataObject, selectedData.details[i]);
 
-                // Add the new data object to the dictionary with the name as the key
-                dataObjects.Add(name, newDataObject);
+                // Add the new data object to the dictionary with a unique key
+                string dataKey = selectedName + "_" + i;
+                dataObjects.Add(dataKey, newDataObject);
             }
         }
     }
-
-    private void AssignDataToTextComponents(GameObject dataObject, WeightData data)
+    private void AssignDataToTextComponents(GameObject dataObject, DetailData detailData)
     {
         // Get the Text components of the data object
-        Text ageText = dataObject.transform.Find("AgeText").GetComponent<Text>();
-        Text birthText = dataObject.transform.Find("BirthText").GetComponent<Text>();
+        Text dateText = dataObject.transform.Find("DateText").GetComponent<Text>();
+        Text notesText = dataObject.transform.Find("NotesText").GetComponent<Text>();
         Text weightText = dataObject.transform.Find("WeightText").GetComponent<Text>();
 
         // Assign the data to the Text components
-        ageText.text = data.age.ToString();
-        birthText.text = data.birth;
-        weightText.text = data.weight;
+        dateText.text = detailData.date;
+        notesText.text = detailData.notes;
+        weightText.text = detailData.weight.ToString();
     }
 
-    private void ClearDataObjects()
+   private void ClearDataObjects()
     {
         // Destroy existing data objects
         foreach (KeyValuePair<string, GameObject> kvp in dataObjects)
@@ -180,6 +232,11 @@ public class weightdata : MonoBehaviour
 
         // Clear the dictionary
         dataObjects.Clear();
+    }
+
+    public void dateChoose(){
+        Debug.Log("date method called");
+        dateInput.text = DatePickerControl.dateStringFormato;
     }
 }
 
@@ -193,13 +250,13 @@ public class MyWeight
 public class WeightData
 {
     public string name;
-    public int age;
-    public string birth;
-    public string entry;
-    public string weight;
+    public List<DetailData> details;
+}
+
+[System.Serializable]
+public class DetailData
+{
+    public string date;
     public string notes;
-    public string breed;
-    public string gender;
-    public string obtain;
-    // Add other fields to match your JSON structure
+    public float weight;
 }
