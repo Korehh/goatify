@@ -15,6 +15,9 @@ public class Displayingarchive : MonoBehaviour
     public Text breedText;
     public Text genderText;
     public Text obtainText;
+    public Text stageText;
+    public Text tagmotherText;
+    public Text tagfatherText;
 
     private MyData myArchive;
 
@@ -49,6 +52,9 @@ public class Displayingarchive : MonoBehaviour
             breedText.text = "";
             genderText.text = "";
             obtainText.text = "";
+            stageText.text = "";
+            tagmotherText.text = "";
+            tagfatherText.text = "";
         }
     }
 
@@ -72,6 +78,9 @@ public class Displayingarchive : MonoBehaviour
             breedText.text = targetItem.breed;
             genderText.text = targetItem.gender;
             obtainText.text = targetItem.obtain;
+            stageText.text =targetItem.stageG;
+            tagmotherText.text =targetItem.tagmother;
+            tagfatherText.text = targetItem.tagfather;
             
         }
         else
@@ -87,6 +96,9 @@ public class Displayingarchive : MonoBehaviour
             breedText.text = "";
             genderText.text = "";
             obtainText.text = "";
+            stageText.text = "";
+            tagmotherText.text = "";
+            tagfatherText.text = "";
         }
     }
     else
@@ -94,14 +106,17 @@ public class Displayingarchive : MonoBehaviour
     
         // If no data is available, display a message
         nameText.text = "No Data";
-        ageText.text = "";
-        birthText.text = "";
-        entryText.text = "";
-        weightText.text = "";
-        notesText.text = "";
-        breedText.text = "";
-        genderText.text = "";
-        obtainText.text = "";
+            ageText.text = "";
+            birthText.text = "";
+            entryText.text = "";
+            weightText.text = "";
+            notesText.text = "";
+            breedText.text = "";
+            genderText.text = "";
+            obtainText.text = "";
+            stageText.text = "";
+            tagmotherText.text = "";
+            tagfatherText.text = "";
     }
 }
 }
@@ -124,5 +139,8 @@ public class DataItem
     public string breed;
     public string gender;
     public string obtain;
+    public string stageG;
+    public string tagfather;
+    public string tagmother;
     // Add other fields to match your JSON structure
 }

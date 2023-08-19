@@ -19,9 +19,8 @@ public class weightdata : MonoBehaviour
     public Transform dataContainer;
     private Dictionary<string, GameObject> dataObjects = new Dictionary<string, GameObject>();
     private MyWeight myWeight;
-
+    
     private string jsonFilePath;
-
     void Start()
     {
         jsonFilePath = Path.Combine(Application.persistentDataPath, "Weightdata.json");
@@ -111,15 +110,21 @@ public class weightdata : MonoBehaviour
     {
         // Assign the data fields to text objects
         dateText.text = detailData.date;
-        notesText.text = detailData.notes;
         weightText.text = detailData.weight.ToString();
+        notesText.text = detailData.notes;
     }
 
     private void ClearTextFields()
     {
         dateText.text = "";
-        notesText.text = "";
         weightText.text = "";
+        notesText.text = "";
+    }
+    public void ClearInputFields()
+    {
+        dateInput.text = "";
+        notesInput.text = "";
+        weightInput.text = "";
     }
 
     public void SaveData()
@@ -134,8 +139,8 @@ public class weightdata : MonoBehaviour
         DetailData newData = new DetailData()
         {
             date = date,
-            notes = notes,
-            weight = weight
+            weight = weight,
+            notes = notes
         };
 
         // Find the existing data item with the same name
@@ -164,41 +169,38 @@ public class weightdata : MonoBehaviour
 
         // Write the JSON data to the file
         File.WriteAllText(jsonFilePath, jsonData);
-
+        ClearInputFields();
         // Update the dropdown options
         PopulateNameDropdown();
 
         // Update the data objects
         CreateDataObjects();
+        
     }
 
  private void CreateDataObjects()
     {
         // Clear any existing data objects
-        ClearDataObjects();
+    ClearDataObjects();
 
-        // Get the selected name from the dropdown
-        string selectedName = nameDropdown.options[nameDropdown.value].text;
+    // Get the selected name from the dropdown
+    string selectedName = nameDropdown.options[nameDropdown.value].text;
 
-        // Find the data item with the selected name
-        WeightData selectedData = myWeight.dataList.Find(item => item.name == selectedName);
+    // Find the data item with the selected name
+    WeightData selectedData = myWeight.dataList.Find(item => item.name == selectedName);
 
-        if (selectedData != null)
+    if (selectedData != null)
+    {
+        for (int i = 0; i < selectedData.details.Count; i++)
         {
-            for (int i = 0; i < selectedData.details.Count; i++)
-            {
-                // Instantiate a new data object from the template
-                GameObject newDataObject;
+            // Instantiate a new data object from the template
+            GameObject newDataObject = Instantiate(dataTB, dataContainer.transform);
 
-                if (i == 0)
-                {
-                    newDataObject = Instantiate(dataTB, dataContainer);
-                }
-                else
-                {
-                    newDataObject = Instantiate(dataTB, dataContainer.transform);
-                    newDataObject.name = dataTB.name + " clone " + i;
-                }
+            if (newDataObject == null)
+            {
+                Debug.LogError("New data object is null.");
+                return;
+            }
 
                 // Assign the corresponding data to the Text components of the new data object
                 AssignDataToTextComponents(newDataObject, selectedData.details[i]);
@@ -209,17 +211,23 @@ public class weightdata : MonoBehaviour
             }
         }
     }
-    private void AssignDataToTextComponents(GameObject dataObject, DetailData detailData)
+   private void AssignDataToTextComponents(GameObject dataObject, DetailData detailData)
     {
-        // Get the Text components of the data object
-        Text dateText = dataObject.transform.Find("DateText").GetComponent<Text>();
-        Text notesText = dataObject.transform.Find("NotesText").GetComponent<Text>();
-        Text weightText = dataObject.transform.Find("WeightText").GetComponent<Text>();
+        
+    // Get the GameObjects containing the Text components
+    GameObject borderDate = dataObject.transform.Find("BorderDate").gameObject;
+    GameObject borderWeight = dataObject.transform.Find("BorderWeight").gameObject;
+    GameObject borderNotes = dataObject.transform.Find("BorderNotes").gameObject;
 
-        // Assign the data to the Text components
-        dateText.text = detailData.date;
-        notesText.text = detailData.notes;
-        weightText.text = detailData.weight.ToString();
+    // Get the Text components of the GameObjects
+    Text dateText = borderDate.transform.Find("DateText").GetComponent<Text>();
+    Text weightText = borderWeight.transform.Find("WeightText").GetComponent<Text>();
+    Text notesText = borderNotes.transform.Find("NotesText").GetComponent<Text>();
+
+    // Assign the data to the Text components
+    dateText.text = detailData.date;
+    weightText.text = detailData.weight.ToString();
+    notesText.text = detailData.notes;
     }
 
    private void ClearDataObjects()

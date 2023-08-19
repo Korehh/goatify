@@ -17,7 +17,14 @@ public class displayingdata : MonoBehaviour
     public Text breedText;
     public Text genderText;
     public Text obtainText;
+    public Text stageText;
+    public Text tagmotherText;
+    public Text tagfatherText;
 
+    public RawImage rawImage;
+    public string pathA = "Assets/Images/StageImg/malegoat.png"; // Path for condition A
+    public string pathB = "Assets/Images/StageImg/femalegoat.png"; // Path for condition B
+    public string pathC = "Assets/Images/StageImg/kidgoat.png"; // Path for condition C
     private MyData myData;
 
     void Start()
@@ -51,7 +58,11 @@ public class displayingdata : MonoBehaviour
             breedText.text = "";
             genderText.text = "";
             obtainText.text = "";
+            stageText.text = "";
+            tagmotherText.text = "";
+            tagfatherText.text = "";
         }
+        LoadAndDisplayConditionalImage();
     }
 
     private void DisplayDataByAge(int targetAge)
@@ -74,13 +85,16 @@ public class displayingdata : MonoBehaviour
             breedText.text = targetItem.breed;
             genderText.text = targetItem.gender;
             obtainText.text = targetItem.obtain;
+            stageText.text =targetItem.stageG;
+            tagmotherText.text =targetItem.tagmother;
+            tagfatherText.text = targetItem.tagfather;
             
         }
         else
         {
             // If no data item with the target age is found, display a message
         
-            nameText.text = "No Data";
+             nameText.text = "No Data";
             ageText.text = "";
             birthText.text = "";
             entryText.text = "";
@@ -89,6 +103,9 @@ public class displayingdata : MonoBehaviour
             breedText.text = "";
             genderText.text = "";
             obtainText.text = "";
+            stageText.text = "";
+            tagmotherText.text = "";
+            tagfatherText.text = "";
         }
     }
     else
@@ -96,19 +113,52 @@ public class displayingdata : MonoBehaviour
     
         // If no data is available, display a message
         nameText.text = "No Data";
-        ageText.text = "";
-        birthText.text = "";
-        entryText.text = "";
-        weightText.text = "";
-        notesText.text = "";
-        breedText.text = "";
-        genderText.text = "";
-        obtainText.text = "";
+            ageText.text = "";
+            birthText.text = "";
+            entryText.text = "";
+            weightText.text = "";
+            notesText.text = "";
+            breedText.text = "";
+            genderText.text = "";
+            obtainText.text = "";
+            stageText.text = "";
+            tagmotherText.text = "";
+            tagfatherText.text = "";
     }
 }
 public void EditScene(){
     PlayerPrefs.SetInt("AgePass", int.Parse(ageText.text));
-    SceneManager.LoadScene("UpdateGoat");
+    SceneManager.LoadScene("UpdateGoatF");
+    }
+
+void LoadAndDisplayConditionalImage()
+    {
+        string selectedPath = "";
+
+        // Determine which path to use based on some conditions
+        if (stageText.text == "Wether" || stageText.text == "Buckling" || stageText.text == "Buck")
+        {
+            selectedPath = pathA;
+        }
+        else if (stageText.text == "Doeling" || stageText.text == "Doe")
+        {
+            selectedPath = pathB;
+        }
+        else if (stageText.text == "Kid")
+        {
+            selectedPath = pathC;
+        }
+        else
+        {
+            Debug.LogError("No valid condition met.");
+            return;
+        }
+
+        // Load the image from the selected path
+        byte[] imageBytes = System.IO.File.ReadAllBytes(selectedPath);
+        Texture2D rawImage = new Texture2D(2, 2);
+        rawImage.LoadImage(imageBytes);
+
     }
 }
 
@@ -130,5 +180,8 @@ public class DataArhive
     public string breed;
     public string gender;
     public string obtain;
+    public string stageG;
+    public string tagfather;
+    public string tagmother;
     // Add other fields to match your JSON structure
 }

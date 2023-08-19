@@ -1,253 +1,228 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 using UnityEngine.SceneManagement;
+using System;
+
 public class ArchiveDisplayingdata : MonoBehaviour
 {
-    public InputField nameInputField;
-    public InputField ageInputField;
+    public GameObject buttonsContainerPrefab;
+    public Transform containerParent;
+    //private float steadyHeight = 1570f;
+    //private float extraItemHeight = 260f; // Set to a positive value here
+    private Vector3 initialPosition;
 
-    public InputField datebirthInputField; // change date picker 
-    public InputField dateentryageInputField;// change date picker
-    public InputField weightInputField;
-    public InputField notesInputField;
+    private List<CustomDataArchive> customDataList = new List<CustomDataArchive>(); // Declare customDataList at the class level
 
+     public RawImage rawImage; // Reference to the RawImage component
 
-    public Dropdown breedDropdown;
-    public Dropdown genderDropdown;
-    public Dropdown obtainDropdown;
+    public Toggle allToggle;
+    public Toggle kidToggle;
+    public Toggle buckToggle;
+    public Toggle doelingToggle;
 
-    public GameObject dataTextPrefab; // Reference to the Text prefab
-    public Transform dataTextContainer; // Reference to the parent Transform for the created Text objects
-    private string dataFilePath;
-    private List<Data> dataList;
-
-    private void Awake()
-    {
-        dataFilePath = Path.Combine(Application.persistentDataPath, "Archivedata.json");
-    }
-
+    public InputField searchInputField;
     private void Start()
     {
-        dataList = new List<Data>();
-        LoadData();
-        ExampleUsage();
-    }
-
-    private void SaveData()
-    {
-        string json = JsonUtility.ToJson(new DataListWrapper(dataList));
-        File.WriteAllText(dataFilePath, json);
-    }
-
-    private void LoadData()
-    {
-        if (File.Exists(dataFilePath))
-        {
-            string json = File.ReadAllText(dataFilePath);
-            DataListWrapper dataListWrapper = JsonUtility.FromJson<DataListWrapper>(json);
-            dataList = dataListWrapper.dataList;
-        }
-        else
-        {
-            dataList = new List<Data>();
-        }
-    }
-
-    public void AddData()
-    {   
-        int selectedBreed = breedDropdown.value;
-        int selectedGender = genderDropdown.value;
-        int selectedObtain = obtainDropdown.value;
-
-        string breedselectedText = breedDropdown.options[selectedBreed].text;
-        string genderselectedText = genderDropdown.options[selectedGender].text;
-        string obtainselectedText =  obtainDropdown.options[selectedObtain].text;
-
-        string name = nameInputField.text;
-        int age = int.Parse(ageInputField.text);
-
-        string birth= datebirthInputField.text;
-        string entry = dateentryageInputField.text;
-        string weight = weightInputField.text;
-        string notes = notesInputField.text;
-
-        string breed = breedselectedText;
-        string gender = genderselectedText;
-        string obtain =  obtainselectedText;
-
-
-        Data newData = new Data(name, age, birth,entry,weight,notes, breed, gender, obtain );
-        dataList.Add(newData);
-
-        SaveData();
-    }
-
-    // Example usage
-    private void ExampleUsage()
-    {
-
-    foreach (Transform child in dataTextContainer)
-        {
-            Destroy(child.gameObject);
-        }
-
-    float yOffset = 0f; // Vertical offset between Text objects
-
-    // Create Text objects for each data entry
-    foreach (Data data in dataList)
-        {
-            // Instantiate the dataTextPrefab
-            GameObject dataTextObject = Instantiate(dataTextPrefab, dataTextContainer);
-            Text dataText = dataTextObject.GetComponent<Text>();
-            dataText.text = "Name: " + data.name +" "+ "No.: " + data.age;
-
-            // Position the Text object
-            RectTransform textTransform = dataTextObject.GetComponent<RectTransform>();
-            textTransform.anchoredPosition = new Vector2(0f, yOffset);
-
-              // Set the text color to white
-            dataText.color = Color.white;
-            // Create a button as a child of the Text object
-            GameObject buttonObject = new GameObject("Button");
-            buttonObject.transform.SetParent(dataTextObject.transform, false);
-
-            // Add the button component and set its properties
-            Button button = buttonObject.AddComponent<Button>();
-            button.onClick.AddListener(() => OnButtonClick(data.name, data.age));
-
-            // Add a Text component to the button and set its properties
-            Text buttonText = buttonObject.AddComponent<Text>();
-            buttonText.text = "Click";
-            buttonText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            buttonText.alignment = TextAnchor.MiddleCenter;
-            buttonText.fontSize = 40; // Set the text size here
-            
-
-             // Position and size the button within the Text object
-                 RectTransform buttonTransform = buttonObject.GetComponent<RectTransform>();
-                buttonTransform.anchorMin = new Vector2(0f, 0f); // Align top-left
-                buttonTransform.anchorMax = new Vector2(0f, 0f); // Align top-left
-                buttonTransform.pivot = new Vector2(0f, 0f); // Set pivot to top-left
-                buttonTransform.anchoredPosition = new Vector2(700f, 75f); // Set the position of the button
-
-                buttonTransform.sizeDelta = new Vector2(150f, 80f); // Set the button size here
-
-            // Increase the vertical offset
-            yOffset -= 100f; // Adjust this value to control the spacing between Text objects
-        }
-    
-    }
-
-    
-    private void OnButtonClick(string name, int age)
-    {
-        PlayerPrefs.SetString("NamePass", name);
-        PlayerPrefs.SetInt("AgePass", age);
-        //SceneManager.LoadScene("UpdateGoat");
-        SceneManager.LoadScene("DisplayArchive");
-        // inputField.text = PlayerPrefs.GetString("INamePassnput");
         
-    }
-    //udpdating data 
-    //public int GetIndexByName(string name)
-    public int GetIndexByAge(int age)
-    {
-        for (int i = 0; i < dataList.Count; i++)
+
+        UpdateGoatDisplay(); // Update the goat display initially
+        // Store the initial position of the Container
+        initialPosition = new Vector3(containerParent.position.x, 0f, containerParent.position.z);
+
+        string jsonFilePath = Path.Combine(Application.persistentDataPath, "Archivedata.json");
+
+        if (File.Exists(jsonFilePath))
         {
-            if (dataList[i].age == age)
+            string jsonString = File.ReadAllText(jsonFilePath);
+            ContainerDataListArchive dataList = JsonUtility.FromJson<ContainerDataListArchive>(jsonString);
+
+            //int totalItems = dataList.dataList.Length;
+            //float totalHeight = steadyHeight;
+
+           // if (totalItems > 7)
+            //{
+            //    totalHeight += (totalItems - 7) * extraItemHeight;
+            //    Debug.Log("Total Items: " + totalItems);
+            //    Debug.Log("Total Height: " + totalHeight);
+            //}
+            // Subtract 20 from the total height
+            //totalHeight -= 90f;
+            foreach (ContainerDataArchive data in dataList.dataList)
             {
-                return i; // Return the index of the matching entry
+                GameObject buttonsContainer = Instantiate(buttonsContainerPrefab, containerParent);
+
+                // Set the properties based on the JSON data
+                Text nameText = buttonsContainer.transform.Find("Name Text").GetComponent<Text>();
+                Text ageText = buttonsContainer.transform.Find("Age Text").GetComponent<Text>();
+                Text genderText = buttonsContainer.transform.Find("Gender Text").GetComponent<Text>();
+                nameText.text = data.name;
+                ageText.text = data.age.ToString();
+                genderText.text = data.gender;
+            
+                 // Get the Button component from the button container
+                Button ageButton = buttonsContainer.GetComponentInChildren<Button>();
+
+                  // Add a RawImage component
+                RawImage rawImagePrefab = buttonsContainer.transform.Find("RawImagePrefab").GetComponent<RawImage>();
+                RawImage rawImage = Instantiate(rawImagePrefab, buttonsContainer.transform);
+
+                // Store the age and button reference in the custom data structure
+                CustomDataArchive CustomDataArchive = new CustomDataArchive();
+                CustomDataArchive.age = data.age;
+                CustomDataArchive.button = ageButton;
+                CustomDataArchive.rawImage = rawImage;
+                CustomDataArchive.stageG = data.stageG;
+                CustomDataArchive.name = data.name;
+                customDataList.Add(CustomDataArchive);
+
+                // Add onClick event to the button to handle the click event
+                ageButton.onClick.AddListener(() => OnAgeButtonClick(ageText.text));
+                //innerButton.onClick.AddListener(() => OnInnerButtonClick(ageText.text));
+
+              Debug.Log("Gender: " + data.stageG); // Debug statement to check the gender value
+
+            if (data.stageG == "Wether" || data.stageG == "Buckling" || data.stageG == "Buck")
+            {
+                rawImage.texture = Resources.Load<Texture2D>("Images/StageImg/malegoat");
             }
-        }
-        
-        return -1; // Return -1 if the entry with the specified name is not found
-    }
-    public Button updateButton;
-    public void SearchAndDisplayData()
-    {   
-        
-        //string name = nameInputField.text;
-        int age = int.Parse(ageInputField.text);
-        int index = GetIndexByAge(age);// tag number will replace this 
-        
-        if (index >= 0)
-        {
-            Data data = dataList[index];
-            //nameText.text = "Name: " + data.name;
-            //ageText.text = "Age: " + data.age.ToString();
-            
-            // Set the input field values to the current data
-            nameInputField.text = data.name;
-            ageInputField.text = data.age.ToString();
-            
-            // Set the update button to update the data at the current index
-            updateButton.onClick.RemoveAllListeners();
-            updateButton.onClick.AddListener(() => UpdateData(index));
+            else if (data.stageG == "Doeling" || data.stageG == "Doe")
+            {
+                rawImage.texture = Resources.Load<Texture2D>("Images/StageImg/femalegoat");
+            }
+            else
+            {
+                rawImage.texture = Resources.Load<Texture2D>("Images/StageImg/kidgoat");
+            }
+
+            // Debug statement to check the loaded image path
+            Debug.Log("Loaded Image Path: " + rawImage.texture);
+            }
+
+            // Set the height of the Container to match the total height required
+            //RectTransform containerRect = containerParent.GetComponent<RectTransform>();
+            //Vector2 containerSize = containerRect.sizeDelta;
+            //containerSize.y = totalHeight;
+            //containerRect.sizeDelta = containerSize;
+            RectTransform containerRect = containerParent.GetComponent<RectTransform>();
+            Vector2 containerSize = containerRect.sizeDelta;
+            containerSize.y = 1400; // Set the height to 1400
+            containerRect.sizeDelta = containerSize;
+
+            // Reset the position of the Container to the initial static position
+            containerParent.position = initialPosition;
         }
         else
         {
-            //nameText.text = "Name: Not Found";
-            //ageText.text = "Age: Not Found";
-            
-            // Clear the input field values
-            nameInputField.text = "";
-            ageInputField.text = "";
-            
-            // Set the update button to do nothing (no data to update)
-            updateButton.onClick.RemoveAllListeners();
+            Debug.LogError("GoatInfo.json not found in the persistent data path.");
+        }
+
+        allToggle.onValueChanged.AddListener(OnToggleValueChanged);
+        kidToggle.onValueChanged.AddListener(OnToggleValueChanged);
+        buckToggle.onValueChanged.AddListener(OnToggleValueChanged);
+        doelingToggle.onValueChanged.AddListener(OnToggleValueChanged);
+
+        // Initially, update the display to show all goats
+        searchInputField.onValueChanged.AddListener(OnSearchBarValueChanged);
+        UpdateGoatDisplay();
+    }
+    public void OnAgeButtonClick(string ageText)
+    {
+        // Extract the age value from the ageText string
+        int age;
+        if (int.TryParse(ageText.Replace("Age: ", ""), out age))
+        {
+            PlayerPrefs.SetInt("AgePass", age);
+            SceneManager.LoadScene("DisplayArchiveF");
+
+            Debug.Log("Age saved to PlayerPrefs: " + age);
+        }
+        else
+        {
+            Debug.LogError("Failed to parse age from the button text: " + ageText);
         }
     }
 
-    public void UpdateData(int index)
+
+     private void OnToggleValueChanged(bool isOn)
     {
-        string name = nameInputField.text;
-        int age = int.Parse(ageInputField.text);
+        UpdateGoatDisplay();
 
-        // Update the data at the specified index
-        dataList[index].name = name;
-        dataList[index].age = age;
-
-        SaveData();
+         foreach (CustomDataArchive CustomDataArchive in customDataList)
+    {
+        Debug.Log("Goat: " + CustomDataArchive.stageG + ", Should Display: " + ShouldDisplayGoat(CustomDataArchive.stageG));
     }
+    }
+
+    private void UpdateGoatDisplay()
+    {
+        string searchText = searchInputField.text.ToLower(); // Convert to lowercase for case-insensitive search
+        foreach (CustomDataArchive CustomDataArchive in customDataList)
+        {
+            // Check if the goat should be displayed based on the selected toggle
+            bool shouldDisplay = ShouldDisplayGoat(CustomDataArchive.stageG) && (SearchMatches(CustomDataArchive, searchText));
+
+            // Set the game objects to active or inactive based on the shouldDisplay value
+            CustomDataArchive.rawImage.gameObject.SetActive(shouldDisplay);
+            CustomDataArchive.button.gameObject.SetActive(shouldDisplay);
+        }
+    }
+
+    private bool ShouldDisplayGoat(string stageG)
+    {
+        if (allToggle.isOn)
+            return true;
+        else if (kidToggle.isOn && (stageG == "Kid" || stageG == "Goat"))
+            return true;
+        else if (buckToggle.isOn && (stageG == "Buck" || stageG == "Buckling"))
+            return true;
+        else if (doelingToggle.isOn && (stageG == "Doeling" || stageG == "Doe"))
+            return true;
+        else
+            return false;
+    }
+
+    public void OnSearchBarValueChanged(string searchText)
+    {
+        UpdateGoatDisplay();
+    }
+    private bool SearchMatches(CustomDataArchive CustomDataArchive, string searchText)
+    {
+        return (CustomDataArchive?.name?.ToLower().Contains(searchText) ?? false) ||
+            (CustomDataArchive?.age.ToString()?.Contains(searchText) ?? false);
+    }
+
+    public void ClearSearchInputField()
+    {
+        searchInputField.text = ""; // Clear the text of the input field
+    }
+
 }
 
 [System.Serializable]
-public class ArhiveData
+public class ContainerDataListArchive
+{
+    public ContainerDataArchive[] dataList;
+}
+
+[System.Serializable]
+public class ContainerDataArchive
 {
     public string name;
     public int age;
-    public string birth;
-    public string entry;
-    public string weight;
-    public string notes;
-    public string breed;
     public string gender;
-    public string obtain;
-
-    public ArhiveData(string name, int age,string birth,string entry,string weight,string notes,string breed,string gender,string obtain)
-    {
-        this.name = name;
-        this.age = age;
-        this.birth = birth;
-        this.entry = entry;
-        this.weight = weight;
-        this.notes = notes;
-        this.breed = breed;
-        this.gender = gender;
-        this.obtain = obtain;
-    }
+    public string stageG;
 }
-
 [System.Serializable]
-public class ArchiveListWrapper
+public class CustomDataArchive
 {
-    public List<Data> dataList;
-
-    public ArchiveListWrapper(List<Data> dataList)
-    {
-        this.dataList = dataList;
-    }
+    public int age;
+    public string name;
+    public String stageG;
+    public Button button;
+    public Button innerButton;
+    public RawImage rawImage;
+    
 }
