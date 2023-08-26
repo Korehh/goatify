@@ -25,6 +25,7 @@ public class savingdata : MonoBehaviour
     public Dropdown obtainDropdown;
     public Dropdown stageMaleDropdown;
     public Dropdown stageFemaleDropdown;
+    public Dropdown StatusDropdown;
 
     public InputField otherinputField;
 
@@ -121,6 +122,7 @@ public class savingdata : MonoBehaviour
         string gender = genderDropdown.options[genderDropdown.value].text;
         string tagfather = tagFatherInputField.text;
         string tagmother = tagMotherInputField.text;
+        string statusG = "Non-Lactating";
 
         string obtain;
         if (obtainDropdown.options[obtainDropdown.value].text == "Other")
@@ -142,7 +144,8 @@ public class savingdata : MonoBehaviour
             stageG = stageFemaleDropdown.options[stageFemaleDropdown.value].text;
         }
 
-        GoatData newData = new GoatData(name, age, birth, entry, weight, notes, breed, gender, obtain, stageG, tagfather, tagmother);
+        
+        GoatData newData = new GoatData(name, age, birth, entry, weight, notes, breed, gender, obtain, stageG, tagfather, tagmother, statusG);
         dataList.Add(newData);
 
         SaveData();
@@ -205,6 +208,48 @@ public class savingdata : MonoBehaviour
         DeleteDataByAge(targetAge);
     }
     
+    public void RestoreDataFromArchive()
+    {
+        int targetAge = PlayerPrefs.GetInt("AgePass");
+        // Load the existing data from the archive file, if it exists
+        List<GoatData> archiveList = new List<GoatData>();
+        if (File.Exists(dataFilePathArchive))
+        {
+            string json = File.ReadAllText(dataFilePathArchive);
+            GoatDataListWrapper dataListWrapper = JsonUtility.FromJson<GoatDataListWrapper>(json);
+            archiveList = dataListWrapper.dataList;
+        }
+
+        // Find the data item with the target age in the archive list
+        GoatData targetData = archiveList.Find(item => item.age == targetAge);
+
+        if (targetData != null)
+        {
+            // Add the target data item back to the main goat data list
+            dataList.Add(targetData);
+
+            // Serialize the main goat data list to JSON
+            string json = JsonUtility.ToJson(new GoatDataListWrapper(dataList));
+
+            // Write the JSON data to the main goat list file
+            File.WriteAllText(dataFilePath, json);
+
+            // Remove the restored data item from the archive list
+            archiveList.Remove(targetData);
+
+            // Serialize the updated archive list to JSON
+            string updatedArchiveJson = JsonUtility.ToJson(new GoatDataListWrapper(archiveList));
+
+            // Write the updated JSON data back to the archive file
+            File.WriteAllText(dataFilePathArchive, updatedArchiveJson);
+
+            Debug.Log("Data item restored from archive successfully!");
+        }
+        else
+        {
+            Debug.Log("No data item found with the specified age in the archive: " + targetAge);
+        }
+    }
    public void UpdateDataByAgeFromInputField()
     {
         int targetAge = PlayerPrefs.GetInt("AgePass");
@@ -259,7 +304,68 @@ public class savingdata : MonoBehaviour
             Debug.Log("No data item found with the specified age: " + targetAge);
         }
     }
+    public void UpdateDataOfStatusFromInputField()
+    {
+        int targetAge = PlayerPrefs.GetInt("AgePass");
+        UpdateDataOfStatus(targetAge);
+    }
+    public void UpdateDataOfStatus(int targetAge)
+    {
+        // Find the data item with the target age
+        GoatData targetData = dataList.Find(item => item.age == targetAge);
 
+        if (targetData != null)
+        {
+            // Perform the update based on your requirements
+            // For example, let's update the name and weight fields
+           targetData.statusG = StatusDropdown.options[StatusDropdown.value].text;
+
+            // Save the updated data
+            SaveData();
+
+            Debug.Log("Data item updated successfully!");
+        }
+        else
+        {
+            Debug.Log("No data item found with the specified age: " + targetAge);
+        }
+    }
+
+    public void UpdateDataOfStageGFromInputField()
+    {
+        int targetAge = PlayerPrefs.GetInt("AgePass");
+        UpdateDataOfStageG(targetAge);
+    }
+    public void UpdateDataOfStageG(int targetAge)
+    {
+        // Find the data item with the target age
+        GoatData targetData = dataList.Find(item => item.age == targetAge);
+
+        if (targetData != null)
+        {
+            // Perform the update based on your requirements
+            // For example, let's update the name and weight fields
+            if (targetData.gender == "Male")
+            {
+                 targetData.stageG = stageMaleDropdown.options[stageMaleDropdown.value].text;
+            }
+            else
+            {
+                
+                  targetData.stageG = stageFemaleDropdown.options[stageFemaleDropdown.value].text;
+            }
+
+
+            // Save the updated data
+            SaveData();
+
+            Debug.Log("Data item updated successfully!");
+        }
+        else
+        {
+            Debug.Log("No data item found with the specified age: " + targetAge);
+        }
+    }
    private void DisplayDataByAge(int targetAge)
     {
         // Find the data item with the target age
@@ -420,8 +526,9 @@ public class GoatData
     public string stageG;
     public string tagfather;
     public string tagmother;
+    public string statusG;
 
-    public GoatData(string name, int age, string birth, string entry, float weight, string notes, string breed, string gender, string obtain, string stageG, string tagfather, string tagmother)
+    public GoatData(string name, int age, string birth, string entry, float weight, string notes, string breed, string gender, string obtain, string stageG, string tagfather, string tagmother, string statusG)
     {
         this.name = name;
         this.age = age;
@@ -435,6 +542,7 @@ public class GoatData
         this.stageG = stageG;
         this.tagfather = tagfather;
         this.tagmother = tagmother;
+        this.statusG = statusG;
     }
 }
 

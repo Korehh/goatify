@@ -18,22 +18,28 @@ public class Displayingarchive : MonoBehaviour
     public Text stageText;
     public Text tagmotherText;
     public Text tagfatherText;
+     public Text StatusGText;
 
-    private MyData myArchive;
+
+    public RawImage rawImage;
+    public string pathA = "Assets/Images/StageImg/malegoat.png"; // Path for condition A
+    public string pathB = "Assets/Images/StageImg/femalegoat.png"; // Path for condition B
+    public string pathC = "Assets/Images/StageImg/kidgoat.png"; // Path for condition C
+    private MyData myData;
 
     void Start()
     {
-       // string jsonFilePath = "Assets/Archivedata.json";
+        //string jsonFilePath = "Assets/GoatInfo.json";
         string jsonFilePath = Path.Combine(Application.persistentDataPath, "Archivedata.json");
 
         // Read the JSON file
         string jsonString = File.ReadAllText(jsonFilePath);
 
         // Parse the JSON data
-        myArchive = JsonUtility.FromJson<MyData>(jsonString);
+        myData = JsonUtility.FromJson<MyData>(jsonString);
 
 
-        if (myArchive != null && myArchive.dataList != null)
+        if (myData != null && myData.dataList != null)
         {
             int targetAge = PlayerPrefs.GetInt("AgePass");
 
@@ -55,80 +61,131 @@ public class Displayingarchive : MonoBehaviour
             stageText.text = "";
             tagmotherText.text = "";
             tagfatherText.text = "";
+            StatusGText.text = "";
         }
+       //LoadAndDisplayConditionalImage();
     }
-
     private void DisplayDataByAge(int targetAge)
-{
-
-    if (myArchive != null && myArchive.dataList != null)
     {
-        // Find the data item with the target age
-        DataArhive targetItem = myArchive.dataList.Find(item => item.age == targetAge);
 
-        if (targetItem != null)
+        if (myData != null && myData.dataList != null)
         {
-            // Assign the data fields to text objects
-            nameText.text = targetItem.name;
-            ageText.text = targetItem.age.ToString();
-            birthText.text = targetItem.birth;
-            entryText.text = targetItem.entry;
-            weightText.text = targetItem.weight;
-            notesText.text = targetItem.notes;
-            breedText.text = targetItem.breed;
-            genderText.text = targetItem.gender;
-            obtainText.text = targetItem.obtain;
-            stageText.text =targetItem.stageG;
-            tagmotherText.text =targetItem.tagmother;
-            tagfatherText.text = targetItem.tagfather;
+            // Find the data item with the target age
+            DataArhive targetItem = myData.dataList.Find(item => item.age == targetAge);
+
+            if (targetItem != null)
+            {
+                // Assign the data fields to text objects
+                nameText.text = targetItem.name;
+                ageText.text = targetItem.age.ToString();
+                birthText.text = targetItem.birth;
+                entryText.text = targetItem.entry;
+                weightText.text = targetItem.weight;
+                notesText.text = targetItem.notes;
+                breedText.text = targetItem.breed;
+                genderText.text = targetItem.gender;
+                obtainText.text = targetItem.obtain;
+                stageText.text =targetItem.stageG;
+                tagmotherText.text =targetItem.tagmother;
+                tagfatherText.text = targetItem.tagfather;
+                StatusGText.text = targetItem.statusG;
+                LoadAndDisplayConditionalImage(targetItem);
+                
+            }
+            else
+            {
+                // If no data item with the target age is found, display a message
             
+                nameText.text = "No Data";
+                ageText.text = "";
+                birthText.text = "";
+                entryText.text = "";
+                weightText.text = "";
+                notesText.text = "";
+                breedText.text = "";
+                genderText.text = "";
+                obtainText.text = "";
+                stageText.text = "";
+                tagmotherText.text = "";
+                tagfatherText.text = "";
+                StatusGText.text = "";
+                LoadAndDisplayConditionalImage(null);
+            }
         }
         else
         {
-            // If no data item with the target age is found, display a message
         
+            // If no data is available, display a message
             nameText.text = "No Data";
-            ageText.text = "";
-            birthText.text = "";
-            entryText.text = "";
-            weightText.text = "";
-            notesText.text = "";
-            breedText.text = "";
-            genderText.text = "";
-            obtainText.text = "";
-            stageText.text = "";
-            tagmotherText.text = "";
-            tagfatherText.text = "";
+                ageText.text = "";
+                birthText.text = "";
+                entryText.text = "";
+                weightText.text = "";
+                notesText.text = "";
+                breedText.text = "";
+                genderText.text = "";
+                obtainText.text = "";
+                stageText.text = "";
+                tagmotherText.text = "";
+                tagfatherText.text = "";
+                StatusGText.text = "";
+                LoadAndDisplayConditionalImage(null);
         }
     }
-    else
-    {
-    
-        // If no data is available, display a message
-        nameText.text = "No Data";
-            ageText.text = "";
-            birthText.text = "";
-            entryText.text = "";
-            weightText.text = "";
-            notesText.text = "";
-            breedText.text = "";
-            genderText.text = "";
-            obtainText.text = "";
-            stageText.text = "";
-            tagmotherText.text = "";
-            tagfatherText.text = "";
+public void EditScene(){
+    PlayerPrefs.SetInt("AgePass", int.Parse(ageText.text));
+    SceneManager.LoadScene("UpdateGoatF");
     }
-}
+
+void LoadAndDisplayConditionalImage(DataArhive targetItem)
+    {
+        string selectedPath = "";
+
+        if (targetItem != null)
+        {
+            // Determine which path to use based on some conditions
+            if (targetItem.stageG == "Wether" || targetItem.stageG == "Buckling" || targetItem.stageG == "Buck")
+            {
+                selectedPath = pathA;
+            }
+            else if (targetItem.stageG == "Doeling" || targetItem.stageG == "Doe")
+            {
+                selectedPath = pathB;
+            }
+            else if (targetItem.stageG == "Kid")
+            {
+                selectedPath = pathC;
+            }
+            else
+            {
+                Debug.LogError("No valid condition met.");
+                return;
+            }
+
+            // Load the image from the selected path
+            byte[] imageBytes = System.IO.File.ReadAllBytes(selectedPath);
+            Texture2D rawTexture = new Texture2D(2, 2);
+            rawTexture.LoadImage(imageBytes);
+
+            // Display the loaded texture in your RawImage component
+            rawImage.texture = rawTexture;
+        }
+        else
+        {
+            // Handle case where targetItem is null
+            Debug.LogError("targetItem is null.");
+        }
+    }   
 }
 
 [System.Serializable]
-public class myArchive
+public class MyData
 {
-    public List<DataItem> dataList;
+    public List<DataArhive> dataList;
 }
 
 [System.Serializable]
-public class DataItem
+public class DataArhive
 {
     public string name;
     public int age;
@@ -142,5 +199,6 @@ public class DataItem
     public string stageG;
     public string tagfather;
     public string tagmother;
+    public string statusG;
     // Add other fields to match your JSON structure
 }

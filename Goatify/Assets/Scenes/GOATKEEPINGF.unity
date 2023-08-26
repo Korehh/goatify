@@ -1153,7 +1153,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: BREEDS
+  m_Text: FOOD
 --- !u!222 &318202485
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2377,7 +2377,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: TYPES OF GOAT RAISING
+  m_Text: BREEDS
 --- !u!222 &654129888
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8463,7 +8463,7 @@ GameObject:
   - component: {fileID: 2084537571}
   - component: {fileID: 2084537570}
   m_Layer: 5
-  m_Name: FOOD
+  m_Name: breed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

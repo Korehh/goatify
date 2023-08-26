@@ -11,8 +11,6 @@ public class DisplayingGoatNew : MonoBehaviour
     public GameObject buttonsContainerPrefab;
     public GameObject editAndViewButtonPrefab;
     public Transform containerParent;
-    //private float steadyHeight = 1570f;
-    //private float extraItemHeight = 260f; // Set to a positive value here
     private Vector3 initialPosition;
 
     private List<CustomData> customDataList = new List<CustomData>(); // Declare customDataList at the class level
@@ -41,17 +39,6 @@ public class DisplayingGoatNew : MonoBehaviour
             string jsonString = File.ReadAllText(jsonFilePath);
             ContainerDataList dataList = JsonUtility.FromJson<ContainerDataList>(jsonString);
 
-            //int totalItems = dataList.dataList.Length;
-            //float totalHeight = steadyHeight;
-
-           // if (totalItems > 7)
-            //{
-            //    totalHeight += (totalItems - 7) * extraItemHeight;
-            //    Debug.Log("Total Items: " + totalItems);
-            //    Debug.Log("Total Height: " + totalHeight);
-            //}
-            // Subtract 20 from the total height
-            //totalHeight -= 90f;
             foreach (ContainerData data in dataList.dataList)
             {
                 GameObject buttonsContainer = Instantiate(buttonsContainerPrefab, containerParent);
@@ -123,6 +110,8 @@ public class DisplayingGoatNew : MonoBehaviour
             //containerSize.y = totalHeight;
             //containerRect.sizeDelta = containerSize;
             RectTransform containerRect = containerParent.GetComponent<RectTransform>();
+            containerRect.pivot = new Vector2(0.5f, 1f);
+            containerRect.anchorMin = new Vector2(0.5f, 1f);
             Vector2 containerSize = containerRect.sizeDelta;
             containerSize.y = 1400; // Set the height to 1400
             containerRect.sizeDelta = containerSize;

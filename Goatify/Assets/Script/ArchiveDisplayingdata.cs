@@ -107,6 +107,8 @@ public class ArchiveDisplayingdata : MonoBehaviour
             //containerSize.y = totalHeight;
             //containerRect.sizeDelta = containerSize;
             RectTransform containerRect = containerParent.GetComponent<RectTransform>();
+            containerRect.pivot = new Vector2(0.5f, 1f);
+            containerRect.anchorMin = new Vector2(0.5f, 1f);
             Vector2 containerSize = containerRect.sizeDelta;
             containerSize.y = 1400; // Set the height to 1400
             containerRect.sizeDelta = containerSize;
@@ -135,7 +137,7 @@ public class ArchiveDisplayingdata : MonoBehaviour
         if (int.TryParse(ageText.Replace("Age: ", ""), out age))
         {
             PlayerPrefs.SetInt("AgePass", age);
-            SceneManager.LoadScene("DisplayArchiveF");
+            SceneManager.LoadScene("DisplayArchive");
 
             Debug.Log("Age saved to PlayerPrefs: " + age);
         }

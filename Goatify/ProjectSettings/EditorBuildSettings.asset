@@ -33,11 +33,17 @@ EditorBuildSettings:
     path: Assets/Scenes/DisplayGoatF.unity
     guid: 8e08832ad887a1448a0a284f16b1ac16
   - enabled: 1
-    path: Assets/Scenes/ArchiveF.unity
-    guid: 54d6d87350b9e7e44a3b3958fdabbdb9
-  - enabled: 1
+    path: Assets/Scenes/Archive.unity
+    guid: 0da9f3f447376ad4c90592bf4e4e8b03
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
     path: Assets/Scenes/DisplayArchiveF.unity
     guid: 38048236209956942adf5745604c7949
+  - enabled: 1
+    path: Assets/Scenes/DisplayArchive.unity
+    guid: e02b8957bdafbe4418db6bc3afd7583e
   - enabled: 1
     path: Assets/Scenes/SMOD1.unity
     guid: d1f0ca6fc8cf62748925295d876ae51e
